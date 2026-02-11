@@ -4,6 +4,7 @@ Genieacs adalah aplikasi gratis opensource untuk mengelola CPE secara masal.
 Saya telah mengconvert aplikasi genieacs agar dapat dijalankan di windows.
 Sumber asli: https://github.com/genieacs/genieacs
 
+
 Cara install:
 1. Download dan install MongoDB melalui shortcut di file ini (nomor 1)
 2. Download dan install NodeJS melalui shortcut di file ini (nomor 2)

@@ -75,6 +75,19 @@ if errorlevel 8 (
 )
 echo %SUCCESS_COLOR%[SUCCESS] Successfully copied to %INSTALL_DIR%%RESET_COLOR%
 
+
+REM === Jalankan npm install di INSTALL_DIR ===
+echo %INFO_COLOR%[INFO] Installing Node.js dependencies...%RESET_COLOR%
+pushd "%INSTALL_DIR%"
+call npm install
+if errorlevel 1 (
+    echo %FAIL_COLOR%[FAIL] npm install failed. Please check Node.js and npm installation.%RESET_COLOR%
+    pause
+    exit /b 1
+)
+popd
+echo %SUCCESS_COLOR%[SUCCESS] npm dependencies installed successfully.%RESET_COLOR%
+
 REM === Membuat file start.bat untuk menjalankan GenieACS ===
 > "%INSTALL_DIR%\start.bat" (
     echo @echo off
@@ -128,4 +141,4 @@ echo ---------------------------------------------------------------------------
 @REM echo Press any key to continue.
 pause
 start https://trakteer.id/r-tech/tip
-start http://127.0.0.1:3000
+start http://127.0.0.1:3000
