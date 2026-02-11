@@ -1,6 +1,5 @@
 # Genieacs For Windows (Unofficial)
-Genieacs For Windows
-[ID]
+# [ID]
 Genieacs adalah aplikasi gratis opensource untuk mengelola CPE secara masal.
 Saya telah mengconvert aplikasi genieacs agar dapat dijalankan di windows.
 Sumber asli: https://github.com/genieacs/genieacs
@@ -29,9 +28,8 @@ Integrasi ONT ke GenieACS
 - TUnggu berberapa saat perangkat akan masuk ke genieacs
 
 Sawer Kopi https://trakteer.id/r-tech/tip
-==================================================================
 
-[EN]
+# [EN]
 Genieacs is a free, open-source application for mass CPE management.
 I've converted the Genieacs application to run on Windows.
 Origina source: https://github.com/genieacs/genieacs
