@@ -5,9 +5,9 @@ Saya telah mengconvert aplikasi genieacs agar dapat dijalankan di windows.
 Sumber asli: https://github.com/genieacs/genieacs
 
 Cara install:
-    1. Download dan install MongoDB melalui shortcut di file ini (nomor 1)
-    2. Download dan install NodeJS melalui shortcut di file ini (nomor 2)
-    3. Buka 3.install-ACS.bat, kemundian tunggu sampai proses selesai
+1. Download dan install MongoDB melalui shortcut di file ini (nomor 1)
+2. Download dan install NodeJS melalui shortcut di file ini (nomor 2)
+3. Buka 3.install-ACS.bat, kemundian tunggu sampai proses selesai
 
     Genieacs beserta config didalamnya akan otomatis terinstall.
     Akan terbuka comand promt service genieacs, biarkan terbuka.
