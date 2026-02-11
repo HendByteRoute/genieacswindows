@@ -1,4 +1,4 @@
-# genieacswindows
+# Genieacs For Windows (Unofficial)
 Genieacs For Windows
 [ID]
 Genieacs adalah aplikasi gratis opensource untuk mengelola CPE secara masal.
