@@ -1,0 +1,131 @@
+ÿþ&cls
+@echo off
+setlocal EnableDelayedExpansion
+
+REM === Warna ANSI untuk output ===
+set "INFO_COLOR=[36m"
+set "SUCCESS_COLOR=[32m"
+set "ERROR_COLOR=[31m"
+set "FAIL_COLOR=[91m"
+set "RESET_COLOR=[0m"
+
+REM === Pastikan ANSI escape code aktif di CMD ===
+reg query HKCU\Console | find "VirtualTerminalLevel" >nul 2>&1 || (
+    reg add HKCU\Console /v VirtualTerminalLevel /t REG_DWORD /d 1 /f >nul
+)
+
+REM === Cek hak akses administrator ===
+net session >nul 2>&1
+if %errorlevel% neq 0 (
+    echo %INFO_COLOR%[INFO] Reopen as Administrator...%RESET_COLOR%
+    powershell -Command "Start-Process '%~f0' -Verb RunAs"
+    exit /b
+)
+echo.
+echo.
+REM === Input lokasi instalasi dengan validasi ===
+:input_patch
+set "INSTALL_PATCH="
+set /p INSTALL_PATCH=%INFO_COLOR%[INFO] Enter the installation location, or leave it blank and %RESET_COLOR%%SUCCESS_COLOR%PRESS ENTER to use the default dir [C:\]:%RESET_COLOR%
+if "%INSTALL_PATCH%"=="" set "INSTALL_PATCH=C:\"
+if not "%INSTALL_PATCH:~-1%"=="\" set "INSTALL_PATCH=%INSTALL_PATCH%\"
+if not exist "%INSTALL_PATCH%" (
+    echo %ERROR_COLOR%[ERROR] Location "%INSTALL_PATCH%" not found.%RESET_COLOR%
+    goto input_patch
+)
+
+REM === Set variabel path utama ===
+set "SOURCE=%~dp0source\genieacs-app"
+set "INSTALL_DIR=%INSTALL_PATCH%genieacs-app"
+set "OLD_FILE=%INSTALL_DIR%-old"
+
+REM === Cek source instalasi ===
+if not exist "%SOURCE%" (
+    echo %ERROR_COLOR%[ERROR] Installation source not found.%RESET_COLOR%
+    pause
+    exit /b 1
+)
+
+REM === Backup instalasi lama jika ada ===
+if exist "%INSTALL_DIR%" (
+    echo %INFO_COLOR%[INFO] Old installation found at %INSTALL_DIR%.%RESET_COLOR%
+    if exist "%OLD_FILE%" (
+        echo %INFO_COLOR%[INFO] Removing old backup folder at %OLD_FILE%.%RESET_COLOR%
+        rmdir /s /q "%OLD_FILE%"
+    )
+    echo %INFO_COLOR%[INFO] Moving %INSTALL_DIR% to %OLD_FILE%.%RESET_COLOR%
+    move "%INSTALL_DIR%" "%OLD_FILE%"
+    if errorlevel 1 (
+        echo %FAIL_COLOR%[FAIL] Failed to move folder to %OLD_FILE%. Please close the GenieACS service first.%RESET_COLOR%
+        pause
+        exit /b
+    )
+)
+
+REM === Proses penyalinan folder baru ===
+echo %INFO_COLOR%[INFO] Copy from: %SOURCE% to %INSTALL_DIR%%RESET_COLOR%
+echo %INFO_COLOR%[INFO] Please wait...%RESET_COLOR%
+
+
+robocopy "%SOURCE%" "%INSTALL_DIR%" /E /NFL /NDL /NJH /NJS /NC >nul
+if errorlevel 8 (
+    echo %FAIL_COLOR%[FAIL] Failed to copy.%RESET_COLOR%
+    pause
+    exit /b 1
+)
+echo %SUCCESS_COLOR%[SUCCESS] Successfully copied to %INSTALL_DIR%%RESET_COLOR%
+
+REM === Membuat file start.bat untuk menjalankan GenieACS ===
+> "%INSTALL_DIR%\start.bat" (
+    echo @echo off
+    echo REM Start GenieACS services in background
+    echo start /b node %INSTALL_DIR%\bin\genieacs-cwmp
+    echo start /b node %INSTALL_DIR%\bin\genieacs-fs
+    echo start /b node %INSTALL_DIR%\bin\genieacs-nbi
+    echo start /b node %INSTALL_DIR%\bin\genieacs-ui
+    echo.
+    echo echo GenieACS services started.
+    echo pause
+)
+
+
+REM === Import config GenieACS ===
+echo %INFO_COLOR%[INFO] Importing GenieACS config...%RESET_COLOR%
+%INSTALL_DIR%\mongorestore.exe --db genieacs --drop "%INSTALL_DIR%\conf-acs"
+del "%INSTALL_DIR%\mongorestore.exe"
+rmdir /s /q "%INSTALL_DIR%\conf-acs"
+echo.
+echo %SUCCESS_COLOR%[SUCCESS] Config successfully imported.%RESET_COLOR%
+echo.
+
+
+REM === Membuat AutoStart GenieACS via Startup folder ===
+set "STARTUP_DIR=%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup"
+
+if exist "%STARTUP_DIR%\GenieACS-Services.lnk" del "%STARTUP_DIR%\GenieACS-Services.lnk"
+
+powershell -Command "$s=(New-Object -COM WScript.Shell).CreateShortcut('%STARTUP_DIR%\GenieACS-Services.lnk'); $s.TargetPath='%INSTALL_DIR%\start.bat'; $s.WorkingDirectory='%INSTALL_DIR%'; $s.WindowStyle=7; $s.Save()"
+
+REM === Menjalankan GenieACS ===
+echo %INFO_COLOR%[INFO] Running GenieACS shortcut...%RESET_COLOR%
+start "" "%STARTUP_DIR%\GenieACS-Services.lnk"
+if errorlevel 1 (
+    echo %FAIL_COLOR%[FAIL] Failed to run GenieACS.%RESET_COLOR%
+) else (
+    echo %SUCCESS_COLOR%[SUCCESS] GenieACS successfully started. Do not close the GenieACS service.%RESET_COLOR%
+)
+
+REM === Selesai ===
+echo ----------------------------------------------------------------------------------
+echo ----------------------------------------------------------------------------------
+echo %SUCCESS_COLOR%====================== Genieacs Installation Complete ======================%RESET_COLOR%
+echo %SUCCESS_COLOR%======================== Open GenieACS UI Port 3000 ========================%RESET_COLOR%
+echo %SUCCESS_COLOR%=========== Traktir kopi agar kami semakin semangat berkarya :) ============%RESET_COLOR%
+echo %SUCCESS_COLOR%====================== https://trakteer.id/r-tech/tip ======================%RESET_COLOR%
+echo ----------------------------------------------------------------------------------
+echo ----------------------------------------------------------------------------------
+
+@REM echo Press any key to continue.
+pause
+start https://trakteer.id/r-tech/tip
+start http://127.0.0.1:3000
